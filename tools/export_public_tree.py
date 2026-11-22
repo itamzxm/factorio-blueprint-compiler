@@ -27,6 +27,7 @@ doc/ 下那几篇**不在**吸收清单里：它们是就地维护的公开版�
 """
 
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -57,6 +58,12 @@ FILES = [
     ("tools/gt_directions_scenario.lua", "tools/probe_directions_scenario.lua"),
     ("data/prototypes.json", None),
     ("data/direction-probe.json", None),
+    ("data/corpus/index.json", None),
+]
+
+# 整批吸收：语料只带原串（.blueprint.txt），解码后的 .json 不进版本库。
+COPY_GLOBS = [
+    ("data/corpus/*.blueprint.txt", "data/corpus"),
 ]
 
 # 整个目录吸收（只收 *.py，跳过 __pycache__ 与 .pyc）：库里新加的模块自动跟上。
@@ -70,9 +77,11 @@ KEEP = [
     "pyproject.toml",
     "requirements.txt",
     "examples/README.md",
+    "data/corpus/README.md",
     "tools/export_public_tree.py",
     "tools/leak_scan.py",
     "tools/make_examples.py",
+    "tools/decode_corpus.py",
     "tools/doc_sources.json",
     "doc/蓝图格式与坑.md",
     "doc/核心库与MCP接口.md",
@@ -127,6 +136,8 @@ SCRUB = [
     ("re", r"(?<![\w])_[A-Za-z][\w-]*/", "out/"),
     ("re", r"(?<![\w])_[A-Za-z][\w-]*\\", "out\\"),
     ("re", r',\s*"_[A-Za-z][\w-]*"\s*,\s*', ', "out", '),
+    # Python / Lua 里「反斜杠 + 反引号」是无效转义（会报 SyntaxWarning）：去掉反斜杠，语义不变。
+    ("re", r"\\`", "`"),
 ]
 
 RIG_FILES = [
@@ -149,6 +160,11 @@ REWRITES = {
     ],
     "bpcompile/testbench.py": [
         ("re", r"和评测[集]给的下限比", "和验收下限比", 1),
+    ],
+    "bpcompile/templates/furnace_array.py": [
+        # 注释里的块数是旧夹具口径的数，公开版换成效力描述（新口径见 README）
+        ("re", r"#   24 台石炉从西端一个进料口喂，黄带 60 秒产 \d+ 块.*?过线）。",
+         "#   24 台石炉从西端一个进料口喂：快带能过 300 的验收线，黄带跑不到。", 1),
     ],
     # ---- 工具 -------------------------------------------------------------
     "tools/build_prototypes.py": [
@@ -236,17 +252,56 @@ REWRITES = {
          "_FAILED = []\n"
          "_PASSED = 0\n",
          'CORPUS = os.path.join(ROOT, "data", "corpus")\n'
-         "# 样本蓝图不随本仓库发布（见 README「样本蓝图」一节）。\n"
-         "# 没有样本时，引用样本的用例**跳过**而不是假过——跳过数会写进总结。\n"
-         'HAS_CORPUS = os.path.isdir(CORPUS) and bool(glob.glob(os.path.join(CORPUS, "*.json")))\n'
+         "# 仓库带的是 .blueprint.txt 原串；.json 是解码产物（没进版本库），缺了就用原串现场解。\n"
+         "# 两个都没有时，引用语料的用例**跳过**而不是假过——跳过数会写进总结。\n"
+         'HAS_CORPUS = os.path.isdir(CORPUS) and bool(\n'
+         '    glob.glob(os.path.join(CORPUS, "*.json"))\n'
+         '    or glob.glob(os.path.join(CORPUS, "*.blueprint.txt"))\n'
+         ")\n"
          "CORPUS_MISSING = (\n"
-         '    "样本蓝图不在（%s 不存在或是空的）：这类用例要自备样本才能跑，见 README「样本蓝图」"\n'
+         '    "蓝图语料不在（%s 不存在或是空的）：放进 .blueprint.txt 就能跑，见 data/corpus/README.md"\n'
          "    % CORPUS\n"
          ")\n"
          "\n"
          "_FAILED = []\n"
          "_SKIPPED = []\n"
          "_PASSED = 0\n",
+         1),
+        # 语料读取：优先用解码后的 .json，只有原串时现场解码
+        ("lit",
+         "def corpus_blueprints():\n"
+         '    for path in sorted(glob.glob(os.path.join(CORPUS, "*.json"))):\n'
+         "        with open(path, encoding=\"utf-8\") as handle:\n"
+         "            payload = json.load(handle)\n"
+         '        if "blueprint" not in payload:\n'
+         "            continue\n"
+         "        yield os.path.basename(path), bpm.Blueprint.from_dict(payload)\n",
+         "def corpus_blueprints():\n"
+         '    """语料：有解码后的 .json 就用它，否则把 .blueprint.txt 现场解出来。\n'
+         "\n"
+         "    仓库只带原串（168 KB）。想要 .json（2.8 MB）跑 tools/decode_corpus.py。\n"
+         '    """\n'
+         "    paths = {}\n"
+         '    for path in glob.glob(os.path.join(CORPUS, "*.json")):\n'
+         "        paths[os.path.splitext(os.path.basename(path))[0]] = path\n"
+         '    for path in glob.glob(os.path.join(CORPUS, "*.blueprint.txt")):\n'
+         '        stem = os.path.basename(path)[: -len(".blueprint.txt")]\n'
+         "        paths.setdefault(stem, path)\n"
+         "    for stem in sorted(paths):\n"
+         "        path = paths[stem]\n"
+         '        if path.endswith(".json"):\n'
+         "            with open(path, encoding=\"utf-8\") as handle:\n"
+         "                payload = json.load(handle)\n"
+         '            if "blueprint" not in payload:\n'
+         "                continue\n"
+         "            blueprint = bpm.Blueprint.from_dict(payload)\n"
+         "        else:\n"
+         "            with open(path, encoding=\"utf-8\") as handle:\n"
+         "                payload = bpm.decode(handle.read())\n"
+         '            if "blueprint" not in payload:\n'
+         "                continue\n"
+         "            blueprint = bpm.Blueprint.from_dict(payload)\n"
+         '        yield stem + ".json", blueprint\n',
          1),
         ("lit",
          "def check(name, fn):\n"
@@ -405,6 +460,13 @@ def plan(source):
                 rel = os.path.relpath(full, source).replace(os.sep, "/")
                 inside = os.path.relpath(full, base).replace(os.sep, "/")
                 plan_map[dst_dir + "/" + inside] = rel
+    for pattern, dst_dir in COPY_GLOBS:
+        matches = sorted(glob.glob(os.path.join(source, *pattern.split("/"))))
+        if not matches:
+            raise ExportError("源目录没有匹配 %s 的文件" % pattern)
+        for full in matches:
+            rel = os.path.relpath(full, source).replace(os.sep, "/")
+            plan_map[dst_dir + "/" + os.path.basename(full)] = rel
     for rel in KEEP + EXAMPLES:
         if rel in plan_map:
             raise ExportError("%s 同时在吸收清单和就地维护清单里" % rel)

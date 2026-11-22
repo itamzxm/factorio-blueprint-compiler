@@ -21,7 +21,7 @@
 
 ## 跑
 
-    python tests/run_tests.py       # 自检（需要样本蓝图的那几条，样本不在时自动跳过）
+    python tests/run_tests.py       # 自检（会用到 data/corpus/ 里的 27 张真实蓝图）
     python mcp_server.py            # stdio MCP server
 
 MCP 客户端配置示例（Claude Desktop / 其它 MCP 客户端通用形状）：

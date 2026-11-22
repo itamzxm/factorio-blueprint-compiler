@@ -17,11 +17,14 @@ from bpcompile import geometry, lint as lintmod, primitives, protos, verify
 from bpcompile.templates import furnace_array
 
 CORPUS = os.path.join(ROOT, "data", "corpus")
-# 样本蓝图不随本仓库发布（见 README「样本蓝图」一节）。
-# 没有样本时，引用样本的用例**跳过**而不是假过——跳过数会写进总结。
-HAS_CORPUS = os.path.isdir(CORPUS) and bool(glob.glob(os.path.join(CORPUS, "*.json")))
+# 仓库带的是 .blueprint.txt 原串；.json 是解码产物（没进版本库），缺了就用原串现场解。
+# 两个都没有时，引用语料的用例**跳过**而不是假过——跳过数会写进总结。
+HAS_CORPUS = os.path.isdir(CORPUS) and bool(
+    glob.glob(os.path.join(CORPUS, "*.json"))
+    or glob.glob(os.path.join(CORPUS, "*.blueprint.txt"))
+)
 CORPUS_MISSING = (
-    "样本蓝图不在（%s 不存在或是空的）：这类用例要自备样本才能跑，见 README「样本蓝图」"
+    "蓝图语料不在（%s 不存在或是空的）：放进 .blueprint.txt 就能跑，见 data/corpus/README.md"
     % CORPUS
 )
 
@@ -52,12 +55,31 @@ def check(name, fn):
 
 
 def corpus_blueprints():
-    for path in sorted(glob.glob(os.path.join(CORPUS, "*.json"))):
-        with open(path, encoding="utf-8") as handle:
-            payload = json.load(handle)
-        if "blueprint" not in payload:
-            continue
-        yield os.path.basename(path), bpm.Blueprint.from_dict(payload)
+    """语料：有解码后的 .json 就用它，否则把 .blueprint.txt 现场解出来。
+
+    仓库只带原串（168 KB）。想要 .json（2.8 MB）跑 tools/decode_corpus.py。
+    """
+    paths = {}
+    for path in glob.glob(os.path.join(CORPUS, "*.json")):
+        paths[os.path.splitext(os.path.basename(path))[0]] = path
+    for path in glob.glob(os.path.join(CORPUS, "*.blueprint.txt")):
+        stem = os.path.basename(path)[: -len(".blueprint.txt")]
+        paths.setdefault(stem, path)
+    for stem in sorted(paths):
+        path = paths[stem]
+        if path.endswith(".json"):
+            with open(path, encoding="utf-8") as handle:
+                payload = json.load(handle)
+            if "blueprint" not in payload:
+                continue
+            blueprint = bpm.Blueprint.from_dict(payload)
+        else:
+            with open(path, encoding="utf-8") as handle:
+                payload = bpm.decode(handle.read())
+            if "blueprint" not in payload:
+                continue
+            blueprint = bpm.Blueprint.from_dict(payload)
+        yield stem + ".json", blueprint
 
 
 # ---- 编码层 -------------------------------------------------------------
@@ -535,7 +557,8 @@ def test_green_circuit_is_clean():
     blueprint.normalize()
     counts = lintmod.report(blueprint)["counts"]
     assert counts["error"] == 0, lintmod.report(blueprint)["by_code"]
-    assert info["stations"]["cable"] == info["stations"]["circuit"], info["stations"]
+    # 配比 3:2（人类蓝图同款）：铜线机 = 绿板机 + ceil(绿板机/2)
+    assert info["stations"]["cable"] == 3 and info["stations"]["circuit"] == 2, info["stations"]
     # 直插：铜线机 -> 绿板机，direction=12（取货朝西、放货朝东）
     direct = [
         e

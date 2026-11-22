@@ -5,7 +5,7 @@
 
 ## 1. 它读不了 2.1 的蓝图
 
-拿 27 张真实 2.1 蓝图（样本受授权限制、不随本仓库发布，见 README「样本蓝图」）喂
+拿 `data/corpus/` 里那 27 张真实 2.1 蓝图喂
 `draftsman.blueprintable.get_blueprintable_from_string`：
 
 | 结果 | 张数 | 例子 |

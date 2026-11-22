@@ -131,7 +131,8 @@ def _lua_string(text):
 
 
 def build_scenario(jobs, tick_limit, terrain="flat", run_ticks=0, power_probe=False, power_single=False,
-                   feed_item="", fluid_probe=False, fluid_name="water", unlock_recipes=True, ports=""):
+                   feed_item="", fluid_probe=False, fluid_name="", unlock_recipes=True, ports="",
+                   fluid_port="", supply_cells=""):
     with open(SCENARIO_TEMPLATE, encoding="utf-8") as handle:
         template = handle.read()
     payload = [{"id": job["id"], "blob": job["blob"], "json": job["payload"]} for job in jobs]
@@ -145,7 +146,9 @@ def build_scenario(jobs, tick_limit, terrain="flat", run_ticks=0, power_probe=Fa
                     .replace("__FLUID_PROBE__", "true" if fluid_probe else "false", 1)
                     .replace("__FLUID_NAME__", fluid_name or "water", 1)
                     .replace("__UNLOCK_RECIPES__", "true" if unlock_recipes else "false", 1)
-                    .replace("__PORT_CELLS__", ports or "", 1))
+                    .replace("__PORT_CELLS__", ports or "", 1)
+                    .replace("__FLUID_PORT__", fluid_port or "", 1)
+                    .replace("__SUPPLY_CELLS__", supply_cells or "", 1))
 
 
 
@@ -892,8 +895,8 @@ def rig_version():
 
 
 def run(specs, factorio, tick_limit, test_ticks, timeout, keep_dir, terrain="flat", run_seconds=0.0,
-        powered=False, powered_single=False, feed_item="", fluids=False, fluid_name="water",
-        keep_locked=False, ports=""):
+        powered=False, powered_single=False, feed_item="", fluids=False, fluid_name="",
+        keep_locked=False, ports="", fluid_port="", supply_cells=""):
     jobs, failures = [], []
     for spec in specs:
         entry = {"id": spec["id"], "source": spec["source"]}
@@ -930,7 +933,8 @@ def run(specs, factorio, tick_limit, test_ticks, timeout, keep_dir, terrain="fla
             effective_tick_limit = max(effective_tick_limit, 300)
             test_ticks = max(test_ticks, effective_tick_limit + 600)
         outcome = probe_rig.run_once(build_scenario(jobs, effective_tick_limit, terrain, run_ticks, powered, powered_single,
-                                                 feed_item, fluids, fluid_name, not keep_locked, ports),
+                                                 feed_item, fluids, fluid_name, not keep_locked, ports, fluid_port,
+                                                 supply_cells),
                                   work_dir,
                                   factorio=factorio, test_ticks=test_ticks, timeout=timeout,
                                   keep=bool(keep_dir))
@@ -983,8 +987,8 @@ def run(specs, factorio, tick_limit, test_ticks, timeout, keep_dir, terrain="fla
 
 
 def check(blueprints, factorio=None, ticks=60, test_ticks=1200, timeout=180.0, keep_dir=None, terrain="flat",
-          run_seconds=0.0, powered=False, powered_single=False, feed_item="", fluids=False, fluid_name="water",
-          keep_locked=False, ports=""):
+          run_seconds=0.0, powered=False, powered_single=False, feed_item="", fluids=False, fluid_name="",
+          keep_locked=False, ports="", fluid_port="", supply_cells=""):
     """库/MCP 入口：吃蓝图字符串或文件路径（单个或列表），直接回结果 dict，不走 stdout。
 
     blueprints 可以是：
@@ -996,7 +1000,8 @@ def check(blueprints, factorio=None, ticks=60, test_ticks=1200, timeout=180.0, k
     """
     specs = normalize_specs(blueprints)
     return run(specs, factorio or probe_rig.FACTORIO_DEFAULT, ticks, test_ticks, timeout, keep_dir, terrain,
-               run_seconds, powered, powered_single, feed_item, fluids, fluid_name, keep_locked, ports)
+               run_seconds, powered, powered_single, feed_item, fluids, fluid_name, keep_locked, ports, fluid_port,
+               supply_cells)
 
 
 def normalize_specs(blueprints):
@@ -1037,17 +1042,45 @@ def main(argv=None):
                         help="给电网接上发电机后逐实体读状态，回答供电覆盖全不全")
     parser.add_argument("--ports", default="",
                         help="模板声明的输出口（蓝图坐标，形如 \"10,14;12,14\"）：只清这些格子上的带子")
+    parser.add_argument("--external-supply", default="",
+                        help="模板声明的外部供给 JSON（{\"external_supply\":[{cell,item,kind}]}）：流体名和口位都从它读")
+    parser.add_argument("--fluid-port", default="",
+                        help="模板声明的流体口（蓝图坐标，形如 \"1,0\"）：--fluids 的源优先接到它最近的管网上")
     parser.add_argument("--keep-locked", action="store_true",
                         help="不解除配方锁定（默认会解锁全部非隐藏配方，让组装机/化工线能跑）")
     parser.add_argument("--fluids", action="store_true",
                         help="往管网里放 infinity-pipe 灌流体，跑几秒后读目标里有没有（默认关）")
-    parser.add_argument("--fluid", default="water", help="--fluids 灌什么流体，默认 water")
+    parser.add_argument("--fluid", default="",
+                        help="--fluids 灌什么流体；不给就按机器配方的液体原料自动判断")
     parser.add_argument("--feed-item", default="",
                         help="夹具往输入带灌什么物品（不传则按蓝图声明的配方推原料；推不出就不喂）")
     parser.add_argument("--run-seconds", type=float, default=0.0,
                         help="L3：建完接上夹具跑多少秒，数真实产量（默认 0 = 不跑）")
     parser.add_argument("--text", action="store_true", help="打印人读摘要而不是 JSON")
     args = parser.parse_args(argv)
+
+    if getattr(args, "external_supply", ""):
+        try:
+            with open(args.external_supply, encoding="utf-8") as handle:
+                declared = json.load(handle)
+        except (OSError, ValueError) as failure:
+            print("读不了 --external-supply：%s" % failure, file=sys.stderr)
+            return 1
+        entries = declared.get("external_supply", []) if isinstance(declared, dict) else declared
+        fluids = [e for e in entries if isinstance(e, dict) and e.get("kind") == "fluid"]
+        if not fluids:
+            print("--external-supply 里没有 kind=fluid 的条目", file=sys.stderr)
+            return 1
+        if not args.fluid:
+            args.fluid = fluids[0].get("item") or ""
+        supplies = [e for e in entries if isinstance(e, dict) and e.get("kind") == "item" and e.get("cell")]
+        if supplies:
+            args.supply_cells = ";".join("%s,%s:%s" % (e["cell"][0], e["cell"][1], e.get("item") or "") for e in supplies)
+        if not args.fluid_port and fluids[0].get("cell"):
+            args.fluid_port = "%s,%s" % (fluids[0]["cell"][0], fluids[0]["cell"][1])
+    if args.fluids and not args.fluid:
+        args.fluids = False
+        print("警告：--fluids 没给流体名，也没给 --external-supply，这次不灌流体（避免把管网灌成水）", file=sys.stderr)
 
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     specs = load_specs(args.blueprints, args.expr)
@@ -1056,7 +1089,7 @@ def main(argv=None):
 
     result = run(specs, args.factorio, args.ticks, args.test_ticks, args.timeout, args.keep, args.terrain,
                  args.run_seconds, args.powered, args.powered_single, args.feed_item, args.fluids, args.fluid,
-                 args.keep_locked, args.ports)
+                 args.keep_locked, args.ports, args.fluid_port, getattr(args, "supply_cells", ""))
     payload = json.dumps(result, ensure_ascii=False, indent=2)
     if args.json:
         with open(args.json, "w", encoding="utf-8") as handle:

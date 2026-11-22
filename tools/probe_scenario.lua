@@ -13,6 +13,8 @@ local FLUID_PROBE = __FLUID_PROBE__
 local FLUID_NAME = "__FLUID_NAME__"
 local UNLOCK_RECIPES = __UNLOCK_RECIPES__
 local PORT_CELLS = "__PORT_CELLS__"
+local FLUID_PORT = "__FLUID_PORT__"
+local SUPPLY_CELLS = "__SUPPLY_CELLS__"
 local POWER_PROBE = __POWER_PROBE__
 local POWER_SINGLE = __POWER_SINGLE__
 
@@ -393,6 +395,25 @@ end
 
 local function setup_fixtures(surface, force, area, declared, forced_feed_item)
   local fixtures = { feeds = {}, sinks = {}, refills = 0, units = {} }
+  -- 声明驱动：声明里有东西 → 只按声明供，启发式全关；没声明 → 一格都不灌
+  fixtures.declared_supply = {}
+  if SUPPLY_CELLS ~= nil and SUPPLY_CELLS ~= "" then
+    local offset_x, offset_y = 0, 0
+    if res ~= nil and res.recipes ~= nil and res.recipes.offset ~= nil then
+      offset_x, offset_y = res.recipes.offset[1], res.recipes.offset[2]
+    end
+    for cell in string.gmatch(SUPPLY_CELLS, "[^;]+") do
+      local sx, sy, item = string.match(cell, "(-?%d+%.?%d*),(-?%d+%.?%d*):(.+)")
+      if sx ~= nil and item ~= nil then
+        fixtures.declared_supply[#fixtures.declared_supply + 1] = {
+          x = math.floor(tonumber(sx) + offset_x), y = math.floor(tonumber(sy) + offset_y),
+          item = item, cell = { tonumber(sx), tonumber(sy) },
+        }
+      end
+    end
+  end
+  fixtures.self_supplied = #fixtures.declared_supply > 0
+    or (surface.count_entities_filtered{ area = area, name = "infinity-chest" } or 0) > 0
   local feed_ingredients = nil
   local feed_belt_index = 0
   -- 声明的输出口（蓝图坐标 → 世界坐标）。没声明就退化成"末端带"启发式，并在回包里标出来。
@@ -549,11 +570,27 @@ local function setup_fixtures(surface, force, area, declared, forced_feed_item)
       local vx, vy = direction_vector(direction)
       local bx, by = tile_of(entity.position)
 
-      if inputs == 0 and not is_underground_output
+      if not fixtures.self_supplied and inputs == 0 and not is_underground_output
          and not output_belt_units[entity.unit_number]
-         and not output_line_units[entity.unit_number] then
+         and not output_line_units[entity.unit_number]
+         and not (fixtures.supplied_belt_units or {})[entity.unit_number] then
         -- 一个永续箱只喂一种物品（实测：一个箱子挂两个 filter 时，臂只会搬第一种）
-        local function spawn_feed(offset_x, offset_y, facing, item_name)
+        fixtures.supplied_belt_units = fixtures.supplied_belt_units or {}
+  do
+    for _, inserter in pairs(surface.find_entities_filtered{ area = area, type = "inserter" }) do
+      if inserter.valid then
+        local ok_pickup, pickup = try(function() return inserter.pickup_target end)
+        local ok_drop, drop = try(function() return inserter.drop_target end)
+        if ok_pickup and ok_drop and pickup ~= nil and drop ~= nil
+           and (pickup.name == "infinity-chest" or tostring(pickup.type):find("container") ~= nil)
+           and (drop.type == "transport-belt" or drop.type == "underground-belt") then
+          fixtures.supplied_belt_units[drop.unit_number] = true
+        end
+      end
+    end
+  end
+
+  local function spawn_feed(offset_x, offset_y, facing, item_name)
           local chest_x, chest_y = bx + offset_x * 2, by + offset_y * 2
           local ins_x, ins_y = bx + offset_x, by + offset_y
           if occupied[chest_x .. "," .. chest_y] or occupied[ins_x .. "," .. ins_y] then return false end
@@ -683,6 +720,54 @@ local function setup_fixtures(surface, force, area, declared, forced_feed_item)
     end
   end
 
+
+  -- 只按声明供固体：每格一个永续箱 + 一只臂，往那一格注
+  for _, entry in ipairs(fixtures.declared_supply) do
+    local target_x, target_y = entry.x, entry.y
+    local function occupied_at(cx, cy) return occupied[cx .. "," .. cy] ~= nil end
+    local placed = false
+    for _, delta in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 2, 0 }, { -2, 0 }, { 0, 2 }, { 0, -2 } }) do
+      if not placed then
+        local ins_x, ins_y = target_x + delta[1], target_y + delta[2]
+        local chest_x = target_x + delta[1] * 2
+        local chest_y = target_y + delta[2] * 2
+        if not occupied_at(ins_x, ins_y) and not occupied_at(chest_x, chest_y) then
+          local facing = (delta[1] == 1 and 12) or (delta[1] == -1 and 4) or (delta[2] == 1 and 8) or (delta[2] == -1 and 0)
+          local ok_ins, feeder = try(function()
+            return surface.create_entity{ name = "fast-inserter", position = { x = ins_x + 0.5, y = ins_y + 0.5 },
+                                          direction = facing, force = force }
+          end)
+          local ok_chest, chest = false, nil
+          if ok_ins and feeder ~= nil then
+            ok_chest, chest = try(function()
+              return surface.create_entity{ name = "infinity-chest", position = { x = chest_x + 0.5, y = chest_y + 0.5 }, force = force }
+            end)
+          end
+          if ok_chest and chest ~= nil then
+            try(function() chest.set_infinity_container_filter(1, { name = entry.item, count = 400, mode = "at-least" }) end)
+            fixtures.feeds[#fixtures.feeds + 1] = chest
+            fixtures.units[chest.unit_number] = true
+            fixtures.units[feeder.unit_number] = true
+            fixtures.declared_placed = fixtures.declared_placed or {}
+            fixtures.declared_placed[#fixtures.declared_placed + 1] = {
+              cell = entry.cell, item = entry.item,
+              at = { ins_x + 0.5, ins_y + 0.5 }, chest = { chest_x + 0.5, chest_y + 0.5 },
+            }
+            placed = true
+          else
+            if ok_ins and feeder ~= nil then try(function() feeder.destroy() end) end
+          end
+        end
+      end
+    end
+    if not placed then
+      fixtures.supply_errors = fixtures.supply_errors or {}
+      fixtures.supply_errors[#fixtures.supply_errors + 1] = {
+        code = "supply_placement_failed", severity = "error",
+        message = string.format("声明供给格 (%s,%s) 周围没有地方放箱子+臂，%s 没供上", entry.cell[1], entry.cell[2], entry.item),
+      }
+    end
+  end
   return fixtures
 end
 
@@ -1139,8 +1224,98 @@ end
 
 -- 流体判据第四条：往管网里灌流体，然后看目标机器/储罐里到底有没有。
 -- 源用 infinity-pipe（它自己就是一根管道，接在管网上就会并进同一个管段）。
+
+-- 机器启动后才知道配方：把自动判断的流体名纠正过来（只改过滤器，不重建实体）
+local function refine_fluid_source(surface, locals_state, recipe_memory)
+  if FLUID_NAME ~= nil and FLUID_NAME ~= "" then return end
+  if locals_state == nil or locals_state.fluid_source == nil or not locals_state.fluid_source.placed then return end
+  local current = locals_state.fluid_source.fluid
+  local wanted = nil
+  for _, recipe_name in pairs(recipe_memory or {}) do
+    local ok_proto, proto = try(function() return prototypes.recipe[recipe_name] end)
+    if ok_proto and proto ~= nil then
+      for _, ingredient in pairs(proto.ingredients) do
+        if ingredient.type == "fluid" and wanted == nil then wanted = ingredient.name end
+      end
+    end
+  end
+  if wanted == nil or wanted == current then return end
+  local ok_entity, entity = try(function() return surface.find_entity("infinity-pipe", locals_state.fluid_source.at) end)
+  if not ok_entity or entity == nil then return end
+  local ok_set = try(function() entity.set_infinity_pipe_filter{ name = wanted, percentage = 1.0 } end)
+  if ok_set then
+    locals_state.fluid_source.fluid = wanted
+    locals_state.fluid_source.refined_from = current
+  end
+end
+
 local function setup_fluid_source(surface, force, area)
-  local result = { placed = false, fluid = FLUID_NAME }
+  -- 没点名灌什么，就从机器配方里读"它需要哪种液体"，别默认 water
+  local fluid_name = FLUID_NAME
+  if fluid_name == nil or fluid_name == "" then
+    -- 优先读蓝图自己声明的配方（机器还没跑起来时 get_recipe() 可能是 nil）
+    local declared_recipes = {}
+    if res ~= nil and res.recipes ~= nil then
+      for _, recipe_name in pairs(res.recipes.declared_by_name or {}) do
+        declared_recipes[recipe_name] = true
+      end
+      for _, recipe_name in pairs(res.recipes.declared or {}) do
+        declared_recipes[recipe_name] = true
+      end
+    end
+    for recipe_name in pairs(declared_recipes) do
+      local ok_proto, proto = try(function() return prototypes.recipe[recipe_name] end)
+      if ok_proto and proto ~= nil then
+        for _, ingredient in pairs(proto.ingredients) do
+          if ingredient.type == "fluid" and fluid_name == nil then fluid_name = ingredient.name end
+        end
+      end
+    end
+  end
+  if fluid_name == nil or fluid_name == "" then
+    for _, machine in pairs(surface.find_entities_filtered{ area = area }) do
+      if machine.valid and (machine.type == "assembling-machine" or machine.type == "furnace") then
+        local ok_recipe, recipe = try(function() return machine.get_recipe() end)
+        if ok_recipe and recipe ~= nil then
+          local ok_proto, proto = try(function() return prototypes.recipe[recipe.name] end)
+          if ok_proto and proto ~= nil then
+            for _, ingredient in pairs(proto.ingredients) do
+              if ingredient.type == "fluid" and fluid_name == nil then
+                fluid_name = ingredient.name
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  if fluid_name == nil or fluid_name == "" then fluid_name = "water" end
+  local result = { placed = false, fluid = fluid_name }
+  local anchor = nil
+  -- 1) 模板自己带的 infinity-pipe：把它当"声明的流体口"，连流体名一起采纳
+  for _, entity in pairs(surface.find_entities_filtered{ area = area, name = "infinity-pipe" }) do
+    if entity.valid then
+      anchor = { entity.position.x, entity.position.y }
+      local ok_settings, settings = try(function() return entity.get_infinity_pipe_filter() end)
+      if ok_settings and settings ~= nil and settings.name ~= nil then
+        result.template_fluid = settings.name
+      end
+      result.template_source = { anchor[1], anchor[2] }
+      break
+    end
+  end
+  -- 2) 调用方声明的 --fluid-port（蓝图坐标 → 世界坐标）
+  if FLUID_PORT ~= nil and FLUID_PORT ~= "" then
+    local sx, sy = string.match(FLUID_PORT, "(-?%d+%.?%d*),(-?%d+%.?%d*)")
+    if sx ~= nil and sy ~= nil then
+      local ox, oy = 0, 0
+      if res ~= nil and res.recipes ~= nil and res.recipes.offset ~= nil then
+        ox, oy = res.recipes.offset[1], res.recipes.offset[2]
+      end
+      anchor = { tonumber(sx) + ox, tonumber(sy) + oy }
+      result.declared_port = { anchor[1], anchor[2] }
+    end
+  end
   -- 绝不能盖掉蓝图自己的实体：先记下所有被占的格
   local occupied = {}
   for _, entity in pairs(surface.find_entities_filtered{ area = area }) do
@@ -1152,6 +1327,15 @@ local function setup_fluid_source(surface, force, area)
   if #pipes == 0 then
     pipes = surface.find_entities_filtered{ area = area, type = "pipe-to-ground" }
   end
+  -- 有锚点就按"离锚点最近"排，没有就按原顺序
+  if anchor ~= nil then
+    table.sort(pipes, function(a, b)
+      local da = math.abs(a.position.x - anchor[1]) + math.abs(a.position.y - anchor[2])
+      local db = math.abs(b.position.x - anchor[1]) + math.abs(b.position.y - anchor[2])
+      return da < db
+    end)
+    result.anchor_distance = math.abs(pipes[1].position.x - anchor[1]) + math.abs(pipes[1].position.y - anchor[2])
+  end
   for _, pipe in pairs(pipes) do
     local px, py = tile_of(pipe.position)
     for _, delta in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
@@ -1162,7 +1346,7 @@ local function setup_fluid_source(surface, force, area)
         end)
         if ok_source and source ~= nil then
           local ok_filter = try(function()
-            source.set_infinity_pipe_filter{ name = FLUID_NAME, percentage = 1.0 }
+            source.set_infinity_pipe_filter{ name = fluid_name, percentage = 1.0 }
           end)
           local ok_segment, segment = try(function() return source.get_fluid_segment_id(1) end)
           if ok_filter and ok_segment and segment ~= nil then
@@ -1470,10 +1654,10 @@ local function stage_job(job, index, force)
   if POWER_PROBE then
     res.power_setup = setup_power(surface, force, area)
   end
+  res.recipes = apply_blueprint_recipes(surface, area, job)
   if FLUID_PROBE then
     res.fluid_source = setup_fluid_source(surface, force, area)
   end
-  res.recipes = apply_blueprint_recipes(surface, area, job)
   if RUN_TICKS > 0 then
     -- 夹具留到第一个 tick 再建：这时插入机的 pickup/drop 目标才有效，
     -- 否则算不出哪条带是"机器放货的出口带"，会把产物线当输入线来喂。
@@ -1720,6 +1904,45 @@ script.on_nth_tick(10, function()
       end
     end
   end
+
+  if RUN_TICKS > 0 and game.tick % 120 == 0 then
+    for index, job in ipairs(JOBS) do
+      local res = R.jobs[index]
+      local job_surface = game.surfaces["bp-probe-" .. index]
+      if job_surface ~= nil and res.area ~= nil then
+        res.belt_samples = res.belt_samples or {}
+        if #res.belt_samples < 900 then
+          for _, belt in pairs(job_surface.find_entities_filtered{ area = res.area, type = "transport-belt" }) do
+            if belt.valid then
+              local lanes = {}
+              for lane = 1, 2 do
+                local ok_line, line = try(function() return belt.get_transport_line(lane) end)
+                if ok_line and line ~= nil then
+                  local ok_contents, contents = try(function() return line.get_contents() end)
+                  if ok_contents and type(contents) == "table" and #contents > 0 then lanes[lane] = contents end
+                end
+              end
+              if lanes[1] ~= nil or lanes[2] ~= nil then
+                res.belt_samples[#res.belt_samples + 1] = {
+                  tick = game.tick, x = math.floor(belt.position.x), y = math.floor(belt.position.y),
+                  dir = belt.direction, lanes = lanes,
+                }
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  if FLUID_PROBE and game.tick % 30 == 0 then
+    for index, job in ipairs(JOBS) do
+      local res = R.jobs[index]
+      local job_surface = game.surfaces["bp-probe-" .. index]
+      if job_surface ~= nil then
+        pcall(function() refine_fluid_source(job_surface, res, res.recipe_memory or {}) end)
+      end
+    end
+  end
   if RUN_TICKS > 0 and game.tick % 30 == 0 then
     for index, job in ipairs(JOBS) do
       local res = R.jobs[index]
@@ -1749,7 +1972,7 @@ script.on_nth_tick(10, function()
           for _, belt in pairs(surface.find_entities_filtered{ area = res.area, type = "transport-belt" }) do
             if belt.valid then
               local y = math.floor(belt.position.y)
-              if y == 6 or y == 7 or y == 13 or y == 14 then
+              if true then
                 local lanes = {}
                 for lane = 1, 2 do
                   local ok_line, line = try(function() return belt.get_transport_line(lane) end)

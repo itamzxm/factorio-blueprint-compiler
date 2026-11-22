@@ -15,7 +15,7 @@
       py+4  塑料带 ────────────────  端口在东端
 
 **关键**：石油气从主管下来时会被煤带那一行挡住，所以用**地下管**跨过煤带
-（\`underground_pipe_pair\`，跨度 2）。管口只和"朝向那一侧"的管子连通，
+（`underground_pipe_pair`，跨度 2）。管口只和"朝向那一侧"的管子连通，
 所以主管在上、入口朝北、出口朝南，三段才能接成一条。
 """
 
@@ -90,7 +90,8 @@ def plastic_line(
 
     gas_port = (origin_cell[0] - 1, gas_row)
     coal_port = (origin_cell[0] - 1, coal_row)
-    out_port = (origin_cell[0] + span, out_row)
+    # 带子从 x0-1 起铺 span 格 → 最后一格是 x0+span-2，端口要紧贴它的**下一格**
+    out_port = (origin_cell[0] + span - 1, out_row)
     blueprint.add_port(gas_port, "输入", "石油气从这里进（走地下管穿煤带）", 4, "petroleum-gas")
     blueprint.add_port(coal_port, "输入", "煤从这里进（向东流）", 4, "coal")
     blueprint.add_port(out_port, "输出", "塑料从这里出来", 4, "plastic-bar")

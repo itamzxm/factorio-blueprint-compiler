@@ -1,6 +1,10 @@
 {
+  "data/corpus/README.md": {
+    "sha256": "0234700cd4780e46a2a15045b564197dec4c70cc3cebd5bfe48f801dc7ec92bf",
+    "source": "data/corpus/README.md"
+  },
   "doc/塑料产线.md": {
-    "sha256": "1666cc7637da2a950ec637c1c8f5efc5eea858506210b880b75138c3cbbb427f",
+    "sha256": "f9ca07313c3d2ca2516425f292fd0570fd718802960a587c69f7549f185808b2",
     "source": "doc/塑料产线.md"
   },
   "doc/核心库与MCP接口.md": {
@@ -16,11 +20,11 @@
     "source": "doc/直插原语.md"
   },
   "doc/真机校验.md": {
-    "sha256": "b59a5029810e10674922537428ef06f20273803931ef874859ef9c6e0579eab8",
+    "sha256": "32faf0724040182380e084325c2cca0323e23b14ca9631280add01480d6b1259",
     "source": "doc/环境与能力.md"
   },
   "doc/绿板产线.md": {
-    "sha256": "0a914dd2d78f979e03ade2640f84698ad8312d32709bfe32a0ba60d1089186e8",
+    "sha256": "4b17c35c5ccf7cd5559aeb319f33b10cd8a04ca05c4a32e454d3149044f82506",
     "source": "doc/绿板产线.md"
   },
   "doc/自测版夹具.md": {

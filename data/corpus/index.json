@@ -1,0 +1,988 @@
+{
+ "source_site": "https://www.factorio.school",
+ "source_api": "https://facorio-blueprints.firebaseio.com",
+ "captured": "2026-11-22 前后一次抓取（newest 150）",
+ "license_note": "Blueprint strings are included as a reference corpus for AI learning and benchmarking: analysing human layouts, comparing against generated ones, training or fine-tuning - no learning-use restriction. Provenance: factorio.school (https://www.factorio.school); each item keeps its original id, title, author and source URL. Please credit the original creators if you redistribute these designs.",
+ "game_version": "Factorio 2.1.24 + base/space-age/quality/elevated-rails/recycler",
+ "count": 27,
+ "items": [
+  {
+   "id": "-P6Y88Iitz3kCnw9doXE",
+   "title": "City Block Standard 100*100",
+   "author": null,
+   "favorites": 0,
+   "created": 1794812188093,
+   "updated": 1795147304727,
+   "source": "https://www.factorio.school/view/-P6Y88Iitz3kCnw9doXE",
+   "sha256_16": "8f59b6feec7fa396",
+   "why": "城市块 100x100；电塔/机器人网格",
+   "entities": 40,
+   "kinds": 2,
+   "bbox": [
+    -55,
+    -55,
+    55,
+    55
+   ],
+   "size": [
+    111,
+    111
+   ],
+   "blueprint_names": {
+    "roboport": 4,
+    "big-electric-pole": 36
+   }
+  },
+  {
+   "id": "-P6Hm_gReLzD3PRonzqh",
+   "title": "[item=recycler,quality=legendary] Recycler Upcycling  (Bot-based) [quality=legendary]",
+   "author": null,
+   "favorites": 1,
+   "created": 1794537839152,
+   "updated": 1795147218144,
+   "source": "https://www.factorio.school/view/-P6Hm_gReLzD3PRonzqh",
+   "sha256_16": "e883e236f3883622",
+   "why": "回收机 upcycling；recycler 这一型只在 2.0+ 有",
+   "entities": 43,
+   "kinds": 10,
+   "bbox": [
+    100,
+    1004,
+    110,
+    1018
+   ],
+   "size": [
+    10,
+    15
+   ],
+   "blueprint_names": {
+    "requester-chest": 9,
+    "bulk-inserter": 14,
+    "active-provider-chest": 1,
+    "recycler": 1,
+    "roboport": 1,
+    "beacon": 1,
+    "substation": 1,
+    "assembling-machine-3": 5,
+    "arithmetic-combinator": 5,
+    "storage-chest": 5
+   }
+  },
+  {
+   "id": "-P5w31JmiY-lbNNwtUxP",
+   "title": "Show number circuit - expandable",
+   "author": null,
+   "favorites": 0,
+   "created": 1794156537285,
+   "updated": 1794156800738,
+   "source": "https://www.factorio.school/view/-P5w31JmiY-lbNNwtUxP",
+   "sha256_16": "187c8112d28b8c15",
+   "why": "数字显示电路；极小电路样本（45 实体）",
+   "entities": 45,
+   "kinds": 3,
+   "bbox": [
+    -22,
+    4,
+    -12,
+    10
+   ],
+   "size": [
+    12,
+    7
+   ],
+   "blueprint_names": {
+    "arithmetic-combinator": 33,
+    "display-panel": 11,
+    "constant-combinator": 1
+   }
+  },
+  {
+   "id": "-P7-UiQEn_VeNkJAomtj",
+   "title": "Memory Selector",
+   "author": null,
+   "favorites": 0,
+   "created": 1795304646510,
+   "updated": 1795304646512,
+   "source": "https://www.factorio.school/view/-P7-UiQEn_VeNkJAomtj",
+   "sha256_16": "90d3613243f41491",
+   "why": "记忆选择器；69 实体里 49 个是组合器，电路密度样本",
+   "entities": 69,
+   "kinds": 5,
+   "bbox": [
+    1,
+    0,
+    19,
+    19
+   ],
+   "size": [
+    19,
+    19
+   ],
+   "blueprint_names": {
+    "substation": 4,
+    "display-panel": 16,
+    "constant-combinator": 6,
+    "arithmetic-combinator": 10,
+    "decider-combinator": 33
+   }
+  },
+  {
+   "id": "-P625rATcBaaROdqUARf",
+   "title": "plasticbars",
+   "author": null,
+   "favorites": 0,
+   "created": 1794274718525,
+   "updated": 1794274718526,
+   "source": "https://www.factorio.school/view/-P625rATcBaaROdqUARf",
+   "sha256_16": "48aca9cb899fb6e1",
+   "why": "塑料条；只有管道和地下管的极扁样本（35x5）",
+   "entities": 70,
+   "kinds": 9,
+   "bbox": [
+    -18,
+    -2,
+    16,
+    2
+   ],
+   "size": [
+    35,
+    5
+   ],
+   "blueprint_names": {
+    "oil-refinery": 1,
+    "pipe-to-ground": 16,
+    "pipe": 31,
+    "chemical-plant": 5,
+    "fast-underground-belt": 8,
+    "fast-splitter": 1,
+    "fast-inserter": 3,
+    "long-handed-inserter": 1,
+    "fast-transport-belt": 4
+   }
+  },
+  {
+   "id": "-P61CxHbCfdW2_enDEXK",
+   "title": "T1 Red Science - Early Game",
+   "author": null,
+   "favorites": 0,
+   "created": 1794259802093,
+   "updated": 1794358158159,
+   "source": "https://www.factorio.school/view/-P61CxHbCfdW2_enDEXK",
+   "sha256_16": "578205c93977315c",
+   "why": "红瓶最小产线；87 实体，AI 第一版该能达到的水平",
+   "entities": 87,
+   "kinds": 8,
+   "bbox": [
+    76,
+    -28,
+    84,
+    -8
+   ],
+   "size": [
+    8,
+    20
+   ],
+   "blueprint_names": {
+    "assembling-machine-1": 11,
+    "inserter": 10,
+    "transport-belt": 39,
+    "long-handed-inserter": 10,
+    "small-electric-pole": 10,
+    "underground-belt": 2,
+    "fast-inserter": 2,
+    "constant-combinator": 3
+   }
+  },
+  {
+   "id": "-P6Hi36qoaWhXRFg13no",
+   "title": "[item=electromagnetic-plant,quality=legendary] & [item=holmium-plate,quality=legendary] Foundry & Holmium Plate Upcylcing (Bot-based) [quality=legendary]",
+   "author": null,
+   "favorites": 1,
+   "created": 1794536653479,
+   "updated": 1795148319405,
+   "source": "https://www.factorio.school/view/-P6Hi36qoaWhXRFg13no",
+   "sha256_16": "31f85607f3ba0274",
+   "why": "legendary 电磁厂；small + Space Age + quality 三合一",
+   "entities": 90,
+   "kinds": 14,
+   "bbox": [
+    60,
+    682,
+    70,
+    708
+   ],
+   "size": [
+    10,
+    28
+   ],
+   "blueprint_names": {
+    "buffer-chest": 10,
+    "requester-chest": 17,
+    "bulk-inserter": 15,
+    "small-lamp": 5,
+    "recycler": 1,
+    "active-provider-chest": 1,
+    "roboport": 1,
+    "beacon": 2,
+    "substation": 2,
+    "decider-combinator": 10,
+    "stack-inserter": 8,
+    "electromagnetic-plant": 6,
+    "arithmetic-combinator": 6,
+    "storage-chest": 6
+   }
+  },
+  {
+   "id": "-P6Cf_tbKOQ22EqhuSeu",
+   "title": "tileable red circuts",
+   "author": null,
+   "favorites": 1,
+   "created": 1794452119311,
+   "updated": 1795147154534,
+   "source": "https://www.factorio.school/view/-P6Cf_tbKOQ22EqhuSeu",
+   "sha256_16": "2401039fc91feef3",
+   "why": "红板可平铺单元；带管道的混合产线",
+   "entities": 108,
+   "kinds": 11,
+   "bbox": [
+    -16,
+    -4,
+    14,
+    4
+   ],
+   "size": [
+    31,
+    10
+   ],
+   "blueprint_names": {
+    "oil-refinery": 1,
+    "chemical-plant": 5,
+    "pipe": 34,
+    "pipe-to-ground": 20,
+    "fast-transport-belt": 22,
+    "fast-underground-belt": 8,
+    "fast-inserter": 7,
+    "fast-splitter": 3,
+    "long-handed-inserter": 5,
+    "assembling-machine-3": 2,
+    "foundry": 1
+   }
+  },
+  {
+   "id": "-P6t93zv5wF0heiiAPOK",
+   "title": "Urianium processing",
+   "author": null,
+   "favorites": 0,
+   "created": 1795181531316,
+   "updated": 1795181547631,
+   "source": "https://www.factorio.school/view/-P6t93zv5wF0heiiAPOK",
+   "sha256_16": "116d704e7e4f8b1d",
+   "why": "铀处理；离心机 + 硫酸回路",
+   "entities": 119,
+   "kinds": 15,
+   "bbox": [
+    -158,
+    314,
+    -132,
+    336
+   ],
+   "size": [
+    27,
+    23
+   ],
+   "blueprint_names": {
+    "beacon": 33,
+    "centrifuge": 5,
+    "fast-inserter": 14,
+    "active-provider-chest": 4,
+    "substation": 4,
+    "fast-underground-belt": 10,
+    "fast-transport-belt": 27,
+    "bulk-inserter": 4,
+    "fast-splitter": 1,
+    "requester-chest": 4,
+    "storage-chest": 9,
+    "assembling-machine-3": 1,
+    "roboport": 1,
+    "passive-provider-chest": 1,
+    "programmable-speaker": 1
+   }
+  },
+  {
+   "id": "-P6tK0MII4xY7XU-sk9w",
+   "title": "Automatic Mall",
+   "author": null,
+   "favorites": 1,
+   "created": 1795184400019,
+   "updated": 1795184420880,
+   "source": "https://www.factorio.school/view/-P6tK0MII4xY7XU-sk9w",
+   "sha256_16": "6c9ec3c71f4ffdd2",
+   "why": "自动商场；logistic-container 全类型集合",
+   "entities": 146,
+   "kinds": 14,
+   "bbox": [
+    -414,
+    98,
+    -124,
+    192
+   ],
+   "size": [
+    292,
+    95
+   ],
+   "blueprint_names": {
+    "constant-combinator": 1,
+    "roboport": 8,
+    "decider-combinator": 4,
+    "selector-combinator": 8,
+    "buffer-chest": 24,
+    "bulk-inserter": 38,
+    "active-provider-chest": 14,
+    "assembling-machine-3": 4,
+    "beacon": 8,
+    "substation": 3,
+    "storage-chest": 25,
+    "medium-electric-pole": 1,
+    "fast-inserter": 4,
+    "requester-chest": 4
+   }
+  },
+  {
+   "id": "-P6fvfCoM2DpZCIxXrh4",
+   "title": "steam energy",
+   "author": null,
+   "favorites": 0,
+   "created": 1794959651882,
+   "updated": 1795147631290,
+   "source": "https://www.factorio.school/view/-P6fvfCoM2DpZCIxXrh4",
+   "sha256_16": "18e1359c6e471d52",
+   "why": "蒸汽发电；boiler/steam-engine 的 2 档旋转实样",
+   "entities": 160,
+   "kinds": 9,
+   "bbox": [
+    -12,
+    -20,
+    12,
+    18
+   ],
+   "size": [
+    25,
+    39
+   ],
+   "blueprint_names": {
+    "offshore-pump": 1,
+    "pipe": 22,
+    "pipe-to-ground": 6,
+    "boiler": 20,
+    "steam-engine": 40,
+    "small-electric-pole": 17,
+    "inserter": 20,
+    "small-lamp": 6,
+    "transport-belt": 28
+   }
+  },
+  {
+   "id": "-P6HdClFqf8O-Qq9eN6u",
+   "title": "[item=quality-module-3,quality=legendary] Quality Module Upcycling (Bot-based) [quality=legendary]",
+   "author": null,
+   "favorites": 2,
+   "created": 1794535381896,
+   "updated": 1794970491173,
+   "source": "https://www.factorio.school/view/-P6HdClFqf8O-Qq9eN6u",
+   "sha256_16": "c10e4836a6e6cfee",
+   "why": "品质模块产线；蓝图层面的 quality 字段实样",
+   "entities": 165,
+   "kinds": 12,
+   "bbox": [
+    220,
+    670,
+    239,
+    704
+   ],
+   "size": [
+    19,
+    35
+   ],
+   "blueprint_names": {
+    "small-lamp": 20,
+    "substation": 6,
+    "recycler": 4,
+    "requester-chest": 21,
+    "bulk-inserter": 37,
+    "active-provider-chest": 4,
+    "roboport": 4,
+    "beacon": 6,
+    "electromagnetic-plant": 16,
+    "arithmetic-combinator": 16,
+    "storage-chest": 16,
+    "buffer-chest": 15
+   }
+  },
+  {
+   "id": "-P6fxvwb5tPSLLD3e1Kf",
+   "title": "eary smelting",
+   "author": null,
+   "favorites": 0,
+   "created": 1794960244757,
+   "updated": 1795147662885,
+   "source": "https://www.factorio.school/view/-P6fxvwb5tPSLLD3e1Kf",
+   "sha256_16": "470bdeaf0ffa1311",
+   "why": "石炉阵列；纯 inserter+belt 的规则网格",
+   "entities": 177,
+   "kinds": 7,
+   "bbox": [
+    -6,
+    -14,
+    6,
+    13
+   ],
+   "size": [
+    13,
+    27
+   ],
+   "blueprint_names": {
+    "transport-belt": 85,
+    "stone-furnace": 24,
+    "inserter": 50,
+    "small-electric-pole": 13,
+    "splitter": 1,
+    "underground-belt": 2,
+    "wooden-chest": 2
+   }
+  },
+  {
+   "id": "-P6hMjeHxu8MSUmK7c2q",
+   "title": "efficient coal liquefaction,  oil refinary ",
+   "author": null,
+   "favorites": 0,
+   "created": 1794983787476,
+   "updated": 1795150853039,
+   "source": "https://www.factorio.school/view/-P6hMjeHxu8MSUmK7c2q",
+   "sha256_16": "724513be2e505f07",
+   "why": "煤液化炼油厂；pipe-to-ground 高密度样本",
+   "entities": 210,
+   "kinds": 7,
+   "bbox": [
+    -18,
+    -14,
+    18,
+    14
+   ],
+   "size": [
+    37,
+    28
+   ],
+   "blueprint_names": {
+    "oil-refinery": 4,
+    "pipe-to-ground": 82,
+    "pipe": 46,
+    "fast-inserter": 11,
+    "long-handed-inserter": 4,
+    "transport-belt": 51,
+    "chemical-plant": 12
+   }
+  },
+  {
+   "id": "-P668Z1cLQKIUaYFj01S",
+   "title": "Compact Diesel for [planet=vulcanus]",
+   "author": null,
+   "favorites": 0,
+   "created": 1794342535607,
+   "updated": 1794342535609,
+   "source": "https://www.factorio.school/view/-P668Z1cLQKIUaYFj01S",
+   "sha256_16": "5964c3915adbe5e5",
+   "why": "Vulcanus 紧凑柴油线；流体 + 地下管的密集排布",
+   "entities": 221,
+   "kinds": 12,
+   "bbox": [
+    -78,
+    222,
+    -58,
+    258
+   ],
+   "size": [
+    21,
+    37
+   ],
+   "blueprint_names": {
+    "pipe": 79,
+    "pipe-to-ground": 26,
+    "medium-electric-pole": 14,
+    "express-transport-belt": 41,
+    "express-underground-belt": 16,
+    "chemical-plant": 14,
+    "bulk-inserter": 8,
+    "oil-refinery": 8,
+    "display-panel": 5,
+    "fast-inserter": 6,
+    "pump": 2,
+    "express-splitter": 2
+   }
+  },
+  {
+   "id": "-P6g-axgCmZtm3fkblb-",
+   "title": "mid smelting",
+   "author": null,
+   "favorites": 0,
+   "created": 1794960945291,
+   "updated": 1795147694540,
+   "source": "https://www.factorio.school/view/-P6g-axgCmZtm3fkblb-",
+   "sha256_16": "107302227ff0528a",
+   "why": "钢炉阵列；同结构换机器，看尺寸变化怎么影响排布",
+   "entities": 262,
+   "kinds": 8,
+   "bbox": [
+    -6,
+    -14,
+    6,
+    14
+   ],
+   "size": [
+    14,
+    30
+   ],
+   "blueprint_names": {
+    "steel-furnace": 24,
+    "long-handed-inserter": 24,
+    "inserter": 50,
+    "fast-transport-belt": 146,
+    "medium-electric-pole": 8,
+    "fast-splitter": 2,
+    "fast-underground-belt": 6,
+    "wooden-chest": 2
+   }
+  },
+  {
+   "id": "-P6q7rRil3QbFCDkP2-N",
+   "title": "Multiplexed Memory Banks",
+   "author": null,
+   "favorites": 0,
+   "created": 1795130882027,
+   "updated": 1795268482369,
+   "source": "https://www.factorio.school/view/-P6q7rRil3QbFCDkP2-N",
+   "sha256_16": "358b97182118a16f",
+   "why": "多路复用存储体；大量 decider + display-panel",
+   "entities": 306,
+   "kinds": 6,
+   "bbox": [
+    1,
+    2,
+    38,
+    31
+   ],
+   "size": [
+    37,
+    29
+   ],
+   "blueprint_names": {
+    "substation": 6,
+    "display-panel": 51,
+    "constant-combinator": 5,
+    "arithmetic-combinator": 48,
+    "decider-combinator": 192,
+    "small-lamp": 4
+   }
+  },
+  {
+   "id": "-P6g1HfhVvFYPfMw3Vfo",
+   "title": "late smelting",
+   "author": null,
+   "favorites": 0,
+   "created": 1794961386530,
+   "updated": 1795147728489,
+   "source": "https://www.factorio.school/view/-P6g1HfhVvFYPfMw3Vfo",
+   "sha256_16": "d03391bae122388f",
+   "why": "电炉阵列 + 模块；带 beacons 的密度上限",
+   "entities": 337,
+   "kinds": 9,
+   "bbox": [
+    -8,
+    -20,
+    8,
+    20
+   ],
+   "size": [
+    16,
+    40
+   ],
+   "blueprint_names": {
+    "electric-furnace": 24,
+    "small-electric-pole": 14,
+    "long-handed-inserter": 28,
+    "inserter": 54,
+    "fast-transport-belt": 200,
+    "medium-electric-pole": 5,
+    "fast-underground-belt": 8,
+    "fast-splitter": 2,
+    "wooden-chest": 2
+   }
+  },
+  {
+   "id": "-P6qemJVnePqw2s2jegc",
+   "title": "Newt (Inner Planet) - v1",
+   "author": null,
+   "favorites": 0,
+   "created": 1795139773855,
+   "updated": 1795139773857,
+   "source": "https://www.factorio.school/view/-P6qemJVnePqw2s2jegc",
+   "sha256_16": "572e8f491e02fee4",
+   "why": "内行星飞船；小型全功能船",
+   "entities": 385,
+   "kinds": 20,
+   "bbox": [
+    -16,
+    -23,
+    16,
+    28
+   ],
+   "size": [
+    34,
+    51
+   ],
+   "blueprint_names": {
+    "solar-panel": 24,
+    "asteroid-collector": 6,
+    "storage-tank": 6,
+    "pipe": 47,
+    "gun-turret": 16,
+    "cargo-bay": 12,
+    "fast-inserter": 45,
+    "express-transport-belt": 177,
+    "pipe-to-ground": 4,
+    "thruster": 5,
+    "express-underground-belt": 4,
+    "arithmetic-combinator": 9,
+    "chemical-plant": 4,
+    "crusher": 3,
+    "assembling-machine-3": 3,
+    "constant-combinator": 6,
+    "pump": 2,
+    "decider-combinator": 8,
+    "electric-furnace": 3,
+    "space-platform-hub": 1
+   }
+  },
+  {
+   "id": "-P5pFffrPL_taA6a-Olg",
+   "title": "파란물약초당1.2개생산",
+   "author": "neil",
+   "favorites": 0,
+   "created": 1794042411988,
+   "updated": 1794042411994,
+   "source": "https://www.factorio.school/view/-P5pFffrPL_taA6a-Olg",
+   "sha256_16": "7d60156f02300a23",
+   "why": "蓝瓶产线；多级链 + 变速机器",
+   "entities": 515,
+   "kinds": 13,
+   "bbox": [
+    102,
+    98,
+    156,
+    132
+   ],
+   "size": [
+    56,
+    36
+   ],
+   "blueprint_names": {
+    "pipe": 24,
+    "pipe-to-ground": 17,
+    "turbo-transport-belt": 262,
+    "foundry": 7,
+    "chemical-plant": 3,
+    "bulk-inserter": 109,
+    "turbo-underground-belt": 41,
+    "assembling-machine-3": 36,
+    "substation": 10,
+    "beacon": 2,
+    "roboport": 2,
+    "display-panel": 1,
+    "big-electric-pole": 1
+   }
+  },
+  {
+   "id": "-P5tPpSBcgLd0LAToQnV",
+   "title": "Voidbreaker Ship",
+   "author": null,
+   "favorites": 2,
+   "created": 1794112182278,
+   "updated": 1794112365969,
+   "source": "https://www.factorio.school/view/-P5tPpSBcgLd0LAToQnV",
+   "sha256_16": "9332f9964dffb482",
+   "why": "Voidbreaker 船；飞船上的流体与物流混合",
+   "entities": 519,
+   "kinds": 29,
+   "bbox": [
+    -18,
+    -22,
+    18,
+    30
+   ],
+   "size": [
+    38,
+    54
+   ],
+   "blueprint_names": {
+    "pipe": 82,
+    "solar-panel": 7,
+    "rocket-turret": 6,
+    "gun-turret": 16,
+    "turbo-transport-belt": 133,
+    "turbo-underground-belt": 28,
+    "bulk-inserter": 53,
+    "thruster": 9,
+    "asteroid-collector": 4,
+    "decider-combinator": 18,
+    "constant-combinator": 7,
+    "pipe-to-ground": 49,
+    "cargo-bay": 18,
+    "foundry": 5,
+    "fast-inserter": 27,
+    "chemical-plant": 10,
+    "long-handed-inserter": 3,
+    "accumulator": 5,
+    "turbo-splitter": 3,
+    "crusher": 10,
+    "assembling-machine-3": 4,
+    "pump": 2,
+    "space-platform-hub": 1,
+    "programmable-speaker": 1,
+    "nuclear-reactor": 1,
+    "heat-pipe": 10,
+    "heat-exchanger": 3,
+    "steam-turbine": 3,
+    "storage-tank": 1
+   }
+  },
+  {
+   "id": "-P62Hy45IGDpzpNJHdJw",
+   "title": "Jump Start",
+   "author": null,
+   "favorites": 2,
+   "created": 1794277892458,
+   "updated": 1794277892460,
+   "source": "https://www.factorio.school/view/-P62Hy45IGDpzpNJHdJw",
+   "sha256_16": "f49ac0fc769e257d",
+   "why": "Jump Start；起步基地的标准形态",
+   "entities": 688,
+   "kinds": 10,
+   "bbox": [
+    20,
+    -30,
+    64,
+    16
+   ],
+   "size": [
+    46,
+    46
+   ],
+   "blueprint_names": {
+    "assembling-machine-1": 19,
+    "transport-belt": 363,
+    "inserter": 158,
+    "wooden-chest": 5,
+    "small-electric-pole": 50,
+    "splitter": 4,
+    "underground-belt": 14,
+    "small-lamp": 15,
+    "stone-furnace": 48,
+    "lab": 12
+   }
+  },
+  {
+   "id": "-P5rgqU2D9jMhefEg413",
+   "title": "1.12 GW Nuclear",
+   "author": null,
+   "favorites": 0,
+   "created": 1794083350936,
+   "updated": 1794083823583,
+   "source": "https://www.factorio.school/view/-P5rgqU2D9jMhefEg413",
+   "sha256_16": "2eba6558d175adde",
+   "why": "1.12GW 核电；heat-pipe 与 reactor 邻接加成",
+   "entities": 1100,
+   "kinds": 17,
+   "bbox": [
+    0,
+    2,
+    100,
+    64
+   ],
+   "size": [
+    100,
+    62
+   ],
+   "blueprint_names": {
+    "pipe": 308,
+    "pipe-to-ground": 32,
+    "heat-pipe": 348,
+    "heat-exchanger": 112,
+    "big-electric-pole": 6,
+    "steam-turbine": 196,
+    "substation": 12,
+    "medium-electric-pole": 4,
+    "offshore-pump": 8,
+    "requester-chest": 8,
+    "active-provider-chest": 8,
+    "decider-combinator": 8,
+    "inserter": 16,
+    "solar-panel": 12,
+    "nuclear-reactor": 8,
+    "accumulator": 12,
+    "roboport": 2
+   }
+  },
+  {
+   "id": "-P5_wlYMsi2D_Cj8rZ0a",
+   "title": "Rocket Rush Starter Base Layout (스피드런 베이스캠프 전체 배치)",
+   "author": "배가고파",
+   "favorites": 0,
+   "created": 1793785534882,
+   "updated": 1793785534884,
+   "source": "https://www.factorio.school/view/-P5_wlYMsi2D_Cj8rZ0a",
+   "sha256_16": "843b6d4f21427201",
+   "why": "火箭冲刺起步基地；从矿到火箭的整条链",
+   "entities": 1116,
+   "kinds": 13,
+   "bbox": [
+    0,
+    0,
+    82,
+    72
+   ],
+   "size": [
+    83,
+    72
+   ],
+   "blueprint_names": {
+    "boiler": 10,
+    "steam-engine": 20,
+    "inserter": 257,
+    "transport-belt": 548,
+    "pipe": 3,
+    "medium-electric-pole": 63,
+    "assembling-machine-2": 22,
+    "long-handed-inserter": 8,
+    "small-electric-pole": 46,
+    "lab": 10,
+    "electric-mining-drill": 32,
+    "stone-furnace": 96,
+    "rocket-silo": 1
+   }
+  },
+  {
+   "id": "-P6wH4ZGXY9yKaYddtLr",
+   "title": "4-lane 4-way LHD Elevated Intersection",
+   "author": null,
+   "favorites": 0,
+   "created": 1795233962311,
+   "updated": 1795233962313,
+   "source": "https://www.factorio.school/view/-P6wH4ZGXY9yKaYddtLr",
+   "sha256_16": "d260de4f2aae9511",
+   "why": "四向高架立交；elevated-rails 的蓝图实样",
+   "entities": 1710,
+   "kinds": 12,
+   "bbox": [
+    -96,
+    -96,
+    128,
+    128
+   ],
+   "size": [
+    225,
+    225
+   ],
+   "blueprint_names": {
+    "big-electric-pole": 18,
+    "rail-signal": 204,
+    "straight-rail": 636,
+    "curved-rail-a": 120,
+    "roboport": 12,
+    "rail-ramp": 40,
+    "elevated-curved-rail-a": 64,
+    "rail-support": 100,
+    "elevated-curved-rail-b": 64,
+    "elevated-straight-rail": 416,
+    "half-diagonal-rail": 28,
+    "curved-rail-b": 8
+   }
+  },
+  {
+   "id": "-P5URapBl8sTwe8zdyLe",
+   "title": "Max Eletric Furnace",
+   "author": "Vinicius",
+   "favorites": 0,
+   "created": 1793676439052,
+   "updated": 1793676439059,
+   "source": "https://www.factorio.school/view/-P5URapBl8sTwe8zdyLe",
+   "sha256_16": "326bc32aa38edc4c",
+   "why": "最大电炉阵；2000+ 实体的规则重复结构",
+   "entities": 2095,
+   "kinds": 13,
+   "bbox": [
+    -1058,
+    -396,
+    -979,
+    -326
+   ],
+   "size": [
+    81,
+    70
+   ],
+   "blueprint_names": {
+    "transport-belt": 1283,
+    "splitter": 80,
+    "underground-belt": 164,
+    "substation": 25,
+    "fast-inserter": 271,
+    "long-handed-inserter": 29,
+    "electric-furnace": 150,
+    "roboport": 7,
+    "beacon": 75,
+    "fast-underground-belt": 2,
+    "turbo-loader": 4,
+    "infinity-chest": 4,
+    "electric-energy-interface": 1
+   }
+  },
+  {
+   "id": "-P5NR-xIfQars69PtKup",
+   "title": "Train Network",
+   "author": "Sam Rood",
+   "favorites": 8,
+   "created": 1793558843387,
+   "updated": 1793631780365,
+   "source": "https://www.factorio.school/view/-P5NR-xIfQars69PtKup",
+   "sha256_16": "e1d13c9a05b77800",
+   "why": "火车网络；straight/curved rail 混排",
+   "entities": 2559,
+   "kinds": 15,
+   "bbox": [
+    -33,
+    -388,
+    653,
+    622
+   ],
+   "size": [
+    687,
+    1011
+   ],
+   "blueprint_names": {
+    "straight-rail": 1594,
+    "rail-signal": 141,
+    "curved-rail-a": 238,
+    "rail-chain-signal": 145,
+    "curved-rail-b": 238,
+    "steel-chest": 72,
+    "bulk-inserter": 74,
+    "train-stop": 17,
+    "pump": 12,
+    "storage-tank": 12,
+    "pipe": 6,
+    "locomotive": 4,
+    "cargo-wagon": 2,
+    "fluid-wagon": 2,
+    "requester-chest": 2
+   }
+  }
+ ]
+}

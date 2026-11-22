@@ -43,8 +43,11 @@ def green_circuit(
     mw = protos.entity(machine)["w"]
     mh = protos.entity(machine)["h"]
 
+    # 配比 3:2（人类蓝图 -P5_wlYMsi2D_Cj8rL0a 就是这个比例）：
+    # 铜线机 2 个/秒 × 3 = 6/秒；绿板机满负荷 3 铜线/秒 × 2 = 6/秒 —— 正好平。
+    # 一对一是 2 : 3，上限只有 67%，这就是之前注释里写的「跑 67%」。
     n_circuit = primitives.machine_count(target_rate, circuit, machine)
-    n_cable = n_circuit  # 一对一直插；铜线机 2 个/秒，绿板机满负荷要 3 个/秒 → 跑 67%
+    n_cable = n_circuit + (n_circuit + 1) // 2  # ceil(1.5 × n)
 
     # 直插吞吐当场核算：3 根快臂 6.93/秒 ≥ 绿板机满负荷 3 铜线/秒
     demand = _recipe_input(circuit, cable) * (protos.crafting_speed(machine) or 1) / (
@@ -64,12 +67,28 @@ def green_circuit(
     out_arm_row = top_row + mh
     out_row = out_arm_row + 1
 
-    pair_width = mw + 1 + mw
-    total = n_circuit * pair_width + 1
+    # 排布：铜线-绿板-铜线-绿板-铜线 …… 每台绿板机**东西两侧各有一台铜线机**，
+    # 这才是 3:2 能成立的原因（每台绿板机能同时从两侧吃铜线）。
+    slots = ["cable"]
+    for index in range(n_circuit):
+        slots.append("circuit")
+        slots.append("cable" if index < n_cable - 1 else "cable")
+    slots = slots[: n_cable + n_circuit]
+    if slots.count("cable") != n_cable or slots.count("circuit") != n_circuit:
+        slots = []
+        for index in range(n_cable + n_circuit):
+            slots.append("cable" if index % 2 == 0 else "circuit")
+        slots = slots[: n_cable + n_circuit]
+    step = mw + 1  # 机器占 mw 格 + 中间 1 格臂列
+    total = len(slots) * step - 1
 
-    # 两条进料带隔了 1 行，如果两个端口都在同一处，夹具会抢同一批格子
-    # （实测：铁板夹具被挤走 → 铁板进不来 → 绿板机全饿着 → 铜线机 full_output）。
-    # 所以让铁板带往西多伸 5 格，两个端口在横向上分开。
+    # 两条进料带隔了 1 行。两条都从西头进会抢夹具格子（实测：铁板夹具被挤走 → 绿板 0 个），
+    # 而且实测两台绿板机 17 : 9 ——**下游那台只拿到上游一半的铁板**，是沿带被吃掉。
+    # 改法：**铁板带反向，从东头进、往西流**。两个端口一个在西、一个在东，天然不抢，
+    # 而且铁板先遇到的是下游那台，两台吃到的量就平了。
+    # 试过「铁板从东头进、往西流」：几何能建，但自测版夹具建不起来——
+    # 铁板口(x+total,1) 和绿板出口(x+total,7) 都在东头，两套夹具抢同一片地。
+    # 所以退回西头 + 5 格错开，把「两台吃得不均」留作下一步要解的问题。
     stagger = 5
     primitives.belt_run(blueprint, (x0 - 1, copper_row), 4, total + 1, belt)
     primitives.belt_run(blueprint, (x0 - 1 - stagger, iron_row), 4, total + 1 + stagger, belt)
@@ -80,32 +99,38 @@ def green_circuit(
             return [0]
         return [int(round(i * (mw - 1) / (count - 1))) for i in range(count)]
 
-    pairs = []
-    for index in range(n_circuit):
-        left = x0 + index * pair_width
-        cable_machine = blueprint.add_spanning(machine, (left, top_row), None, recipe=cable)
-        circuit_machine = blueprint.add_spanning(
-            machine, (left + mw + 1, top_row), None, recipe=circuit
-        )
-        # 铜线机上方：长臂跨过铁板带取铜板（1 个/秒，2 根长臂 1.66/秒够）
-        for offset in spread(copper_arms):
-            primitives.inserter(blueprint, (left + offset, arm_row), 0, "long-handed-inserter")
-        # 绿板机上方：快臂取铁板
-        for offset in spread(iron_arms):
-            primitives.inserter(
-                blueprint, (left + mw + 1 + offset, arm_row), 0, "fast-inserter"
-            )
-        # 直插：铜线机 → 绿板机，臂列在两机之间
+    placed = []
+    for index, kind in enumerate(slots):
+        left = x0 + index * step
+        recipe = cable if kind == "cable" else circuit
+        machine_entity = blueprint.add_spanning(machine, (left, top_row), None, recipe=recipe)
+        placed.append({"kind": kind, "left": left, "entity": machine_entity})
+        if kind == "cable":
+            # 铜线机上方：长臂跨过铁板带取铜板（1 个/秒，2 根长臂 1.66/秒够）
+            for offset in spread(copper_arms):
+                primitives.inserter(
+                    blueprint, (left + offset, arm_row), 0, "long-handed-inserter"
+                )
+        else:
+            # 绿板机上方：快臂取铁板
+            for offset in spread(iron_arms):
+                primitives.inserter(blueprint, (left + offset, arm_row), 0, "fast-inserter")
+            # 出绿板
+            for offset in spread(iron_arms):
+                primitives.inserter(
+                    blueprint, (left + offset, out_arm_row), 0, "fast-inserter"
+                )
+
+    # 直插臂：每对相邻机器之间一列；铜线在左 → direction=12（取西放东），反之 4
+    for index in range(len(placed) - 1):
+        a, b = placed[index], placed[index + 1]
+        if a["kind"] == b["kind"]:
+            continue
+        direction = 12 if a["kind"] == "cable" else 4
         for offset in range(direct_arms):
             primitives.inserter(
-                blueprint, (left + mw, top_row + offset), 12, "fast-inserter"
+                blueprint, (b["left"] - 1, top_row + offset), direction, "fast-inserter"
             )
-        # 出绿板
-        for offset in spread(iron_arms):
-            primitives.inserter(
-                blueprint, (left + mw + 1 + offset, out_arm_row), 0, "fast-inserter"
-            )
-        pairs.append({"cable": cable_machine, "circuit": circuit_machine})
 
     primitives.ensure_power(
         blueprint, "medium-electric-pole", (x0 - 1 - stagger, arm_row, x0 + total, out_row)

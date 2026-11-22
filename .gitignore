@@ -16,3 +16,7 @@ out/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# 语料的解码产物（跑 tools/decode_corpus.py 生成；原串和 index.json 是版本库里的）
+data/corpus/*.json
+!data/corpus/index.json

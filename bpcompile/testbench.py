@@ -77,39 +77,26 @@ def _infinity_chest(blueprint, cell, item, count=200):
 
 
 def _is_fluid(item):
-    proto = protos.find(item)
-    return bool(proto and proto["type"] == "fluid")
+    # 走 protos.is_fluid（查 fluids 表），不要用 find()——find 只查 entities，
+    # petroleum-gas 这类纯流体查不到，会被当成固体塞进 infinity-chest（塑料那条踩过）。
+    return protos.is_fluid(item)
 
 
 def _attach_fluid(blueprint, cell, item):
-    """流体口用 infinity-pipe 直灌：带子运不了液体。
+    """流体口**只声明、不自建供给源**。
 
-    管口只和相邻格连通，所以接到端口格旁边那一格上（端口格本身已经是管道）。
+    **流体一律由真机侧的 --fluids 供**，自测版不造 infinity-pipe。
+    理由和 5.7 同源：同一个输入不能有两个供给者——两套供气抢同一格，
+    结果是**两边都供不上**（塑料那条实测：一台缺气变两台缺气）。
+
+    这里返回一个声明，让 rig 去接；格子保持空着。
     """
-    for candidate in (
-        (cell[0] - 1, cell[1]),
-        (cell[0] + 1, cell[1]),
-        (cell[0], cell[1] - 1),
-        (cell[0], cell[1] + 1),
-    ):
-        if _free(blueprint, candidate):
-            return blueprint.add(
-                "infinity-pipe",
-                geometry.cell_center(candidate),
-                infinity_settings={
-                    "remove_unfiltered_items": True,
-                    "filters": [{"name": item, "count": 200, "mode": "at-least", "index": 1}],
-                },
-            )
-    raise bpm.BlueprintError(
-        "流体口 %s 四周没有空格放 infinity-pipe" % geometry.format_cell(cell)
-    )
+    return {"cell": list(cell), "item": item}
 
 
 def _attach_input(blueprint, cell, flow, item, arms=DEFAULT_ARMS):
     if _is_fluid(item):
-        _attach_fluid(blueprint, cell, item)
-        return [cell]
+        return [cell], _attach_fluid(blueprint, cell, item)
     found = _station_row(blueprint, cell, flow, arms, -1)
     if found is None:
         raise bpm.BlueprintError(
@@ -177,8 +164,34 @@ def build_testbench(blueprint, seconds=60, product=None, arms=DEFAULT_ARMS):
                 raise bpm.BlueprintError(
                     "输入口 %s 没写 item，不知道灌什么" % geometry.format_cell(cell)
                 )
-            _attach_input(clone, cell, flow, item, arms)
-            manifest["inputs"].append({"cell": list(cell), "item": item, "direction": flow})
+            attached = _attach_input(clone, cell, flow, item, arms)
+            is_fluid = protos.is_fluid(item)
+            manifest["inputs"].append(
+                {
+                    "cell": list(cell),
+                    "item": item,
+                    "direction": flow,
+                    "kind": "fluid" if is_fluid else "item",
+                    "supplied_by": "rig" if is_fluid else "testbench fixture",
+                }
+            )
+            # **声明驱动**：每一个输入点都在 external_supply 里报一次（格 + 物品 + 类别），
+            # 谁供由约定决定，不靠猜。
+            #   流体 → 只由真机的 --fluids 供，自测版不建源（两套供气抢同一格会互相挤掉）；
+            #   固体 → 由自测版自己建的带子/箱子供。
+            # 真机侧改成"只在声明格供给，没声明一格都不灌"之后，这条清单就是唯一依据。
+            manifest.setdefault("external_supply", []).append(
+                {
+                    "cell": list(cell),
+                    "item": item,
+                    "kind": "fluid" if is_fluid else "item",
+                    "note": (
+                        "自测版不建供给源，由 rig 的 --fluids 接"
+                        if is_fluid
+                        else "自测版已经建好带子+臂+无限箱，rig 不要在这里再灌"
+                    ),
+                }
+            )
         else:
             boxes = _attach_output(clone, cell, flow, item or product or "iron-plate", arms)
             for box in boxes:

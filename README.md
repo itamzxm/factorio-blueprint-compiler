@@ -8,7 +8,7 @@
 
     你说：  bp_furnace_array(count=24, furnace="stone-furnace", input_item="iron-ore")
     得到：  253 个实体的一张蓝图 + 三个接线口坐标 + 0 error / 0 warning / 0 note
-    真机：  落地 300/300，60 秒 produced 330（理论 450），drained {"iron-plate": 326}
+    真机：  253 实体全部落地，60 秒 313 块铁板（理论 450），drained {"iron-plate": 308}
 
 - 提供 MCP server（stdio），25 个工具，任何 MCP 客户端都能接。
 - 也可以当普通 Python 库用：`bpcompile/`，不依赖 MCP。
@@ -16,23 +16,21 @@
 
 ## 它能干什么
 
-**只有一条产线走完了全程验证：炉子阵列。** 其余两个模板的地基（配比层、直插、管道）都已就绪、
-也有真机读数，但**产量没到验收线**——分开写，别混着读。
+**三条产线都有 60 秒真机产出**（读数见下表，各自连跑两次逐项一致）。
+塑料那条 114 / 验收线 120 还差 6 个，其余两条过线——数字摆在这里，别笼统说"都能用"。
 
-### 已验证
+### 三条产线都有实测产出
 
-| 模板 | 60 秒真机读数 |
-|---|---|
-| `furnace_array`（24 台石炉） | **330 块铁板**（理论 450，73.3%），24/24 台在干活，`drained` 核对为 `iron-plate`；连跑三次逐项一致 |
-
-### 地基已就绪、模板未验证
-
-| 模板 | 到哪一步 | 卡在哪 |
+| 模板 | 读数（60 秒，真机） | 验收线 |
 |---|---|---|
-| `green_circuit`（绿板）｜工具 `bp_green_circuit`｜**未通过验收线** | lint 0 error、真机落地 109/109、`by_product {copper-cable: 71, electronic-circuit: 26}` | 26 个 < 验收线 60。铜线堆着而绿板机饿着 → 缺**铁板** |
-| `plastic_line`（塑料）｜工具 `bp_plastic_line`｜**部分验证、产能未达标** | 气通、能产出。48 实体、lint 0/0/0、落地 48/48；两台化工厂流程正常，`by_product: {plastic-bar: 18}` / 60 秒（理论 120，15%） | **煤没到炉子**：煤线终点落在 4 个收货钢箱里，y=−2 进料带是空的——夹具把煤线当成成品线收走了 |
+| `furnace_array(count=24)` | 253 实体；**313 块铁板** / 理论 450 = 69.6%，24/24 working，`drained {iron-plate: 308}` | 300 → 过 |
+| `green_circuit()`（默认） | 102 实体；`by_product {copper-cable: 167, electronic-circuit: 107}`，**绿板 107 / 验收线 60**，5 台全部 working | 60 → 过 |
+| `plastic_line(target_rate=4)` | 48 实体；**114 塑料** / 理论 120 = 95%（默认 `target_rate=2`：58 / 60 = 97%），化工厂全部 working | 120 → 差 6 个（95%） |
 
-数字都对应各自的模板参数（改 `target_rate` 规模就变），换配置要重测。
+> **口径提醒**：`furnace_array` 的旧读数 330–377 出自更早的夹具版本，那时夹具会给自测版的输入带额外灌料。
+> 改成声明驱动后夹具不再插手，读数降到 313。**两组数不可直接比，313 是当前口径。**
+
+三条线都连跑两次逐项一致。数字对应各自的模板参数（改 `target_rate` 规模就变），换配置要重测。
 
 ### 两条硬校验（比"能出图"更值钱的部分）
 
@@ -60,8 +58,8 @@
 缺的能力**不要自己硬造几何**：`bp_machine_grid` + `bp_belt` + `bp_inserter` 能拼出东西，
 但拼出来的东西没经过任何验证，和"能跑"是两回事。
 
-还有一件已经明确**没做完**的事：48 台电炉炼钢那条线，蓝图能建、lint 干净、真机 601/601 落地，
-但 60 秒 `drained` 仍然是 `iron-plate`——产物不是钢板。原因未闭合。
+还有一件已经明确**没做完**的事：炼钢那条线测不出来——原版炉子在蓝图里不存配方，产物由进料决定，
+所以"喂铁板出钢板"这条需求要重新设计，不是加个参数能解决的。
 
 ## 安装
 
@@ -160,7 +158,7 @@
 
     python tests/run_tests.py        # 期望 0 failed
 
-需要样本蓝图的那几条用例，在样本不在时会**跳过**（打印 `skip` 并计入跳过数），不会假装通过。
+用到 `data/corpus/` 那几条用例会直接在真实蓝图上跑；语料不在时会**跳过**（打印 `skip`），不会假装通过。
 
 ### 一条硬规矩：先看产物身份，再看数量
 
@@ -173,20 +171,27 @@
 同理，炉子的产物**由进料决定**：蓝图里给炉子写 `recipe` 是无效字段（游戏自己导出的炉子蓝图里也没有它）。
 所以模板的参数是 `input_item` / `output_item`，不是配方。
 
-## 样本蓝图（不随本仓库发布）
+## 蓝图语料：27 张真实玩家的原版蓝图
 
-测试里有一批**真实玩家蓝图**（27 张原版 2.0/2.1 图）用来做误报校验和格式回归。
-它们来自一个公开的蓝图分享站，站点 `robots.txt` 的 Content-Signal 是
-`ai-train=no, use=reference`：**只能当本地参考样本，不能再发布，也不能拿来训练模型。**
-所以它们不在这个仓库里。
+`data/corpus/` 里是 27 张**真实玩家设计**（原版 2.0/2.1，无第三方 mod），
+来自 [factorio.school](https://www.factorio.school)，2026-11-22 前后抓取。
+**用途不限**：分析人类布局、当基准对照、喂进模型训练或微调，都可以。
 
-想跑那几条用例，自己放一批同格式的样本到 `data/corpus/`：
+**署名归原作者。** 每张的标题、作者、来源链接都记在 `data/corpus/index.json`，
+逐张清单见 [data/corpus/README.md](data/corpus/README.md)。**再分发这些设计时，请一并保留作者与链接。**
 
-    data/corpus/xxx.json          # 解码后的蓝图 JSON，顶层是 {"blueprint": {...}} 或 {"blueprint_book": ...}
-    data/corpus/xxx.blueprint.txt # 可选的原始字符串
+仓库只带原串（`.blueprint.txt`，168 KB）。解码后的 `.json`（2.8 MB）没进版本库，一条命令就有：
 
-放进去之后 `python tests/run_tests.py` 会自动把它们算进去；不放就跳过。
-**请不要把别人的蓝图再发布出去**——这也是这份仓库里没有它们的原因。
+    python tools/decode_corpus.py        # 全解成 .json；--check 只校验，--list 看清单
+
+蓝图串的格式就是 `<1 字节版本字符> + base64(zlib(UTF-8 JSON))`，三行也能自己看：
+
+    import base64, json, zlib
+    text = open("data/corpus/-P6fxvwb5tPSLLD3e1Kf.blueprint.txt", encoding="utf-8").read().strip()
+    print(json.loads(zlib.decompress(base64.b64decode(text[1:])))["blueprint"]["entities"][:2])
+
+它们同时是 `tests/run_tests.py` 的**误报闸**：27 张合法的真实蓝图，
+任何"重叠 / 越界 / 朝向非法"的判定在它们身上都该报 0 违规——误报会立刻暴露。
 
 ## 原型真值表（`data/prototypes.json`）
 
@@ -218,7 +223,7 @@
       testbench.py             自测版夹具
       service.py               工具实现体（不经 MCP 也能直接调）
     mcp_server.py              MCP 门面，25 个工具
-    data/                      真值表与实测读数
+    data/                      真值表、实测读数、蓝图语料（corpus/）
     doc/                       技术文档（格式与坑 / 接口 / 夹具 / 两个模板 / 选型 / 真机校验）
     examples/                  可直接粘进游戏的最小样例
     tests/run_tests.py         自检

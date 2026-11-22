@@ -60,6 +60,16 @@ def exists(name):
     return name in _data()["entities"]
 
 
+def is_fluid(name):
+    """是不是流体。
+
+    **必须查 fluids 表**：`petroleum-gas` / `water` 这些只存在于 fluids，
+    不在 entities 里；而 `crude-oil` 两边都有（entities 里是它的桶/矿）。
+    用 `find()` 判流体会漏掉前者、错判后者。
+    """
+    return name in (_data().get("fluids") or {})
+
+
 def size(name):
     proto = entity(name)
     return (proto["w"], proto["h"])
