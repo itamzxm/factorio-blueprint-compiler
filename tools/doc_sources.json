@@ -1,0 +1,38 @@
+{
+  "doc/塑料产线.md": {
+    "sha256": "1666cc7637da2a950ec637c1c8f5efc5eea858506210b880b75138c3cbbb427f",
+    "source": "doc/塑料产线.md"
+  },
+  "doc/核心库与MCP接口.md": {
+    "sha256": "a077eece902cada974039254b13703fc4d0dd0193ddbea9ed5bdb0f9d27d600a",
+    "source": "doc/核心库与MCP接口.md"
+  },
+  "doc/炉子阵列模板.md": {
+    "sha256": "8ad37708437a8d49df48b0266c3810d3f194b3bf9d21bfa10c2bc888dfac9d5f",
+    "source": "doc/炉子阵列模板.md"
+  },
+  "doc/直插原语.md": {
+    "sha256": "daf5b656f2472019702f50483808d6f255ac811380bbbc94e3bebf2a0ba1e197",
+    "source": "doc/直插原语.md"
+  },
+  "doc/真机校验.md": {
+    "sha256": "b59a5029810e10674922537428ef06f20273803931ef874859ef9c6e0579eab8",
+    "source": "doc/环境与能力.md"
+  },
+  "doc/绿板产线.md": {
+    "sha256": "0a914dd2d78f979e03ade2640f84698ad8312d32709bfe32a0ba60d1089186e8",
+    "source": "doc/绿板产线.md"
+  },
+  "doc/自测版夹具.md": {
+    "sha256": "71919293b63d6466faad08402a804394b70e38253b5f9ca45e73da89b2067c0c",
+    "source": "doc/自测版夹具.md"
+  },
+  "doc/蓝图格式与坑.md": {
+    "sha256": "fcf9d842f8148df811238f0f143b5688168a951861654dbebc0e10d043889940",
+    "source": "doc/蓝图格式与坑.md"
+  },
+  "doc/选型-为什么不用draftsman.md": {
+    "sha256": "0764006a6020bd7ad6ec89fa93e82b48dc75a313331f8ae364dcfeafa3cd1641",
+    "source": "doc/选型-为什么不用draftsman.md"
+  }
+}

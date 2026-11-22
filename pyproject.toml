@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "factorio-blueprint-compiler"
+version = "0.1.0"
+description = "Factorio 蓝图编译器：AI 说语义，代码展开几何，校验器带坐标报错，游戏做终审"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=2.3,<3",
+    "pillow>=10",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Games/Entertainment :: Simulation",
+]
+
+[project.optional-dependencies]
+rig = ["lupa>=2.0"]
+test = ["factorio-draftsman>=4.0"]
+
+[tool.setuptools]
+py-modules = ["mcp_server"]
+
+[tool.setuptools.packages.find]
+include = ["bpcompile*"]

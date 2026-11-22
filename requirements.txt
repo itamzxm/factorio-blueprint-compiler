@@ -1,0 +1,7 @@
+# 跑 MCP server 要的两个包（Pillow 供 PNG 预览）
+mcp>=2.3,<3
+pillow>=10
+
+# 可选：
+#   lupa                 真机档（bp_verify 的 rig/run）需要
+#   factorio-draftsman   只用于交叉验证编码器（一条测试用它当独立解码器）
